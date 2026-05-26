@@ -92,53 +92,65 @@ Los tests validan:
 ### Formulario de contacto — Honeypot + Rate Limiting
 ![Formulario de contacto con honeypot](assets/images/contact_captcha.png)
 
-## Análisis crítico
+## Análisis crítico y discusión
 
-### 1. Amenazas mitigadas y residuales
+### 22. Amenazas específicas que mitiga cada formulario y amenaza residual
 
-Cada formulario protegido mitiga amenazas específicas:
+**Registro (reCAPTCHA v2):** Este formulario es el punto de entrada al sistema y, por tanto, el blanco principal de ataques de registro masivo o Sybil attacks, donde un atacante crea cientos o miles de cuentas falsas de forma automatizada para inflar métricas, enviar spam, o realizar ataques de ingeniería social. También mitiga la enumeración de correos electrónicos: al requerir interacción humana, un atacante no puede probar direcciones de correo de forma masiva para determinar cuáles están registradas. Adicionalmente, dificulta el scraping de páginas internas que requieren autenticación, ya que crear una cuenta viable demanda intervención manual.
 
-- **Registro (reCAPTCHA v2)**: Evita registro masivo de cuentas falsas (Sybil attacks) y automatización de creación de usuarios.
-- **Login (mews/captcha)**: Dificulta ataques de fuerza bruta y credential stuffing al añadir una barrera visual por intento.
-- **Contacto (honeypot + rate limiting)**: Filtra bots rudimentarios (honeypot) y limita el spam volumétrico (rate limiting).
+**Login (mews/captcha):** El formulario de inicio de sesión es el frente de batalla contra ataques de fuerza bruta y credential stuffing. La fuerza bruta consiste en probar combinaciones de usuario/contraseña de forma masiva hasta encontrar una válida; el credential stuffing reutiliza credenciales filtradas de otras plataformas. Al exigir que el usuario resuelva un CAPTCHA visual en cada intento, el costo computacional por intento se eleva dramáticamente: un script que podía probar 1000 contraseñas por segundo queda reducido a intentos manuales. Combinado con el rate limiting nativo de Laravel (5 intentos por minuto), la ventana de ataque se vuelve inviable.
 
-**Amenaza residual**: Ningún CAPTCHA es infalible. Las granjas humanas (click farms) pueden resolver CAPTCHAs manualmente por centavos. Modelos de visión por computadora modernos (OCR con deep learning) rompen CAPTCHAs de texto distorsionado. Los ataques distribuidos (botnets) evaden rate limiting rotando IPs.
+**Contacto (honeypot + rate limiting):** El formulario de contacto público es el blanco predilecto del spam automatizado. El honeypot filtra bots rudimentarios que rellenan todos los campos del formulario, incluidos los invisibles. El rate limiting (5 intentos por minuto por IP) complementa esta defensa al impedir que un atacante que haya identificado y evadido el honeypot pueda enviar grandes volúmenes de mensajes. Ambos mecanismos operan sin fricción para el usuario legítimo, ya que el honeypot es invisible y el rate limiting solo afecta después de múltiples envíos.
 
-### 2. Comparativa: reCAPTCHA v2 vs mews/captcha
+**Amenaza residual:** Ninguna de estas defensas es absoluta. Los ataques distribuidos (botnets) pueden sortear el rate limit rotando IPs entre miles de nodos comprometidos. Las granjas humanas (click farms) ofrecen resolución manual de CAPTCHAs por tan solo 0.50 USD por cada 1000 resoluciones, lo que hace económicamente viable eludir incluso reCAPTCHA v2 para atacantes con recursos. El CAPTCHA de texto distorsionado de mews/captcha es vulnerable a modelos de OCR basados en deep learning (Tesseract, CRNN). La defensa real está en la defensa en profundidad: combinar CAPTCHA con rate limiting, MFA, detección de comportamiento anómalo y monitorización de patrones de tráfico.
+
+### 23. Comparativa: reCAPTCHA v2 vs mews/captcha
 
 | Dimensión | reCAPTCHA v2 (Google) | mews/captcha |
 |---|---|---|
-| **Seguridad** | Alta — análisis comportamental + reputación de IP | Media — vulnerable a OCR moderno |
-| **Accesibilidad** | Incluye alternativa de audio | Limitada — solo imagen visual |
-| **Privacidad** | Google rastrea cookies, historial y comportamiento | Sin rastreo externo — 100% local |
-| **Dependencia externa** | Requiere conexión a servidores de Google | Cero dependencia — funciona offline |
-| **Experiencia de usuario** | Fluida — solo un clic | Fricción — escribir texto distorsionado |
+| **Seguridad** | Alta — análisis comportamental, reputación de IP, detección de navegador headless | Media-baja — vulnerable a OCR moderno y parsers de visión artificial |
+| **Accesibilidad** | Incluye alternativa de audio para personas con discapacidad visual; compatible con WCAG 2.1 | Limitada — solo imagen visual, sin alternativa auditiva; incumple estándares básicos de accesibilidad |
+| **Privacidad del usuario** | Problemática — Google recopila cookies, historial de navegación, patrones de comportamiento y huella digital del dispositivo | Excelente — cero rastreo externo, toda la información permanece en el servidor local |
+| **Dependencia externa** | Total — requiere conexión a servidores de Google; si el servicio está caído o bloqueado (China, Crimea), el formulario se vuelve inutilizable | Nula — funciona completamente offline, sin dependencia de terceros ni latencia de red |
+| **Experiencia de usuario** | Fluida — el usuario solo debe marcar una casilla y en la mayoría de los casos Google lo aprueba sin interacción adicional | Fricción alta — el usuario debe leer e interpretar texto distorsionado y tipearlo correctamente, con alta tasa de error en caracteres ambiguos |
 
-**¿Cuándo preferir cada uno?** reCAPTCHA v2 es superior en entornos públicos con alta exposición a bots. mews/captcha es preferible en intranets, proyectos con restricciones de privacidad (GDPR, soberanía de datos) o cuando no hay conectividad externa.
+**¿En qué escenario preferir cada uno?** reCAPTCHA v2 es la opción superior para aplicaciones web públicas orientadas al consumidor final, donde la experiencia de usuario es prioritaria y la exposición a bots es alta (tiendas online, redes sociales, servicios SaaS). mews/captcha es preferible en intranets corporativas, sistemas gubernamentales, proyectos con requisitos estrictos de privacidad (GDPR, HIPAA, soberanía de datos), aplicaciones offline o entornos donde los servidores de Google están bloqueados. También es una solución adecuada como segunda barrera detrás del rate limiting en formularios de bajo riesgo.
 
-### 3. Evasión de CAPTCHA y defensas complementarias
+### 24. Evasión de CAPTCHA de imágenes y defensas complementarias
 
-**Formas conocidas de elusión:**
+**Forma 1 — OCR y visión artificial avanzada:** Los CAPTCHA de texto distorsionado como los generados por mews/captcha son vulnerables a sistemas de OCR modernos. Herramientas como Tesseract OCR, redes neuronales convolucionales (CNN) y modelos CRNN (Convolutional Recurrent Neural Networks) pueden segmentar y reconocer caracteres incluso con ruido, líneas superpuestas y distorsión. Investigaciones académicas (Bursztein et al., 2014; Gao et al., 2022) reportan tasas de acierto superiores al 90% en CAPTCHAs comerciales de texto. La razón fundamental es que la misma distorsión que hace legible el texto para humanos sigue patrones predecibles que una red bien entrenada puede aprender.
 
-1. **OCR avanzado**: Modelos CNN/RNN como Google Tesseract resuelven CAPTCHAs de texto con alta precisión. Los CAPTCHAs locales (mews/captcha) son particularmente vulnerables.
-2. **Granjas humanas**: Servicios como 2Captcha resuelven cualquier CAPTCHA por ~0.50 USD por 1000 resoluciones, haciendo económicamente viable eludir la protección.
+**Forma 2 — Granjas humanas y servicios de resolución por API:** Servicios como 2Captcha, Anti-Captcha y DeathByCaptcha ofrecen APIs donde un atacante envía la imagen del CAPTCHA y recibe la solución en segundos. Detrás de estos servicios hay trabajadores humanos en países de bajo costo que resuelven CAPTCHAs manualmente. Con precios de 0.50 a 2.00 USD por 1000 resoluciones, el costo de eludir un CAPTCHA es despreciable incluso para atacantes con presupuestos modestos. Esto hace que ningún CAPTCHA basado únicamente en desafíos visuales sea seguro contra ataques con presupuesto.
 
-**Defensas adicionales:**
+**Defensas complementarias:**
 
-- **Rate limiting por IP y usuario** (ya implementado en contacto y login nativo de Laravel)
-- **Autenticación multifactor (MFA)** como segunda capa después del login
-- **Análisis de comportamiento**: Tiempo entre pulsaciones, movimiento de ratón, patrón de navegación
-- **Proof-of-Work**: Soluciones como Cloudflare Turnstile o Friendly Captcha que requieren que el cliente resuelva un problema computacional
+- **Rate limiting**: Limitar el número de intentos por IP, usuario y sesión en ventanas de tiempo. Ya implementado en login (5 intentos/minuto) y contacto (5 intentos/minuto). Defiende contra granjas humanas al hacer que cada intento requiera una nueva resolución de CAPTCHA, elevando el costo económico.
+- **Autenticación multifactor (MFA)**: Añadir un segundo factor (TOTP, SMS, llave de seguridad) después del login con credenciales. Incluso si un atacante obtiene la contraseña, no puede acceder sin el segundo factor.
+- **Análisis de comportamiento**: Medir tiempo entre pulsaciones, velocidad de escritura, movimiento del ratón, patrón de navegación y uso del portapapeles. Los bots muestran patrones significativamente diferentes a los humanos (tiempos exactos, sin errores de tipeo, movimiento de ratón lineal).
+- **Proof-of-Work (PoW)**: Soluciones como Cloudflare Turnstile y Friendly Captcha requieren que el navegador del cliente resuelva un problema computacional costoso antes de enviar el formulario. Esto hace que los ataques masivos sean computacionalmente prohibitivos sin añadir fricción al usuario.
+- **Machine Learning**: Entrenar modelos de detección de bots basados en características de la solicitud HTTP (cabeceras, orden de parámetros, patrones de User-Agent) para complementar el CAPTCHA.
 
-### 4. Privacidad y GDPR
+### 25. Privacidad y críticas GDPR a reCAPTCHA
 
-reCAPTCHA de Google introduce problemas graves de privacidad. Google recopila:
+Google reCAPTCHA introduce problemas significativos de privacidad que han generado controversia legal en la Unión Europea. Cuando un usuario interactúa con el widget de reCAPTCHA, Google recopila la siguiente información sin consentimiento explícito del usuario:
 
-- Cookies de terceros y datos de navegación
-- Reputación de IP y señales de dispositivo
-- Historial de interacciones con reCAPTCHA en múltiples sitios
+- Dirección IP completa y geolocalización aproximada
+- Cookies de Google (NID, ANID, __Secure-*) que permiten rastrear al usuario a través de sitios web
+- Huella digital del navegador (user-agent, plugins instalados, resolución de pantalla, zona horaria, fuentes del sistema)
+- Patrones de interacción con el widget: velocidad y trayectoria del movimiento del ratón, tiempo de clic, secuencia de tecleo
+- Historial de navegación del usuario cuando utiliza servicios de Google (el CAPTCHA se comunica con los servidores de Google incluso antes de que el usuario interactúe con él)
 
-Esto conflictúa con el Reglamento General de Protección de Datos (GDPR) de la UE, que requiere consentimiento explícito para la transferencia de datos a terceros. El Tribunal de Justicia de la Unión Europea ha cuestionado la legalidad de reCAPTCHA bajo el principio de minimización de datos (Art. 5 GDPR). Alternativas como hCaptcha o Turnstile respetan más la privacidad, mientras que mews/captcha elimina completamente el rastreo.
+El problema central desde la perspectiva del GDPR (Reglamento General de Protección de Datos de la UE) es múltiple:
+
+1. **Base legal cuestionable**: Google argumenta que reCAPTCHA es necesario para proteger sus servicios (interés legítimo, Art. 6(1)(f) GDPR). Sin embargo, la transmisión de datos a servidores en EE. UU. sin garantías adecuadas de protección ha sido considerada ilegal por el Tribunal de Justicia de la Unión Europea (TJUE) en el caso Schrems II (C-311/18).
+
+2. **Minimización de datos violada**: El Art. 5(1)(c) GDPR exige que los datos recopilados sean adecuados, pertinentes y limitados a lo necesario. Enviar cookies y datos de navegación completos para determinar si un usuario es humano es desproporcionado cuando existen alternativas menos invasivas como mews/captcha.
+
+3. **Falta de consentimiento explícito**: El Art. 7 GDPR requiere consentimiento libre, específico e informado. La mayoría de los sitios web implementan reCAPTCHA sin informar al usuario ni obtener su consentimiento para la transferencia de datos a Google.
+
+4. **Transferencia internacional de datos**: Los datos del usuario son enviados a servidores en EE. UU. y otros países sin garantías de nivel de protección equivalente al de la UE, lo que viola los Capítulos V y Art. 44-49 GDPR.
+
+Como resultado, varias autoridades de protección de datos (CNIL en Francia, DPC en Irlanda) han emitido directrices advirtiendo que el uso de reCAPTCHA sin consentimiento explícito puede ser ilegal. Alternativas que respetan la privacidad incluyen hCaptcha (que no rastrea usuarios entre sitios), Cloudflare Turnstile (PoW sin cookies) y, por supuesto, soluciones locales como mews/captcha que eliminan completamente cualquier transferencia de datos a terceros.
 
 ## Licencia
 
