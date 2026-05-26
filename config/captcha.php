@@ -1,0 +1,51 @@
+<?php
+
+return [
+    'disable' => env('CAPTCHA_DISABLE', false),
+    'characters' => ['A', 'B', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'J', 'K', 'L', 'M', 'N', 'O',
+        'P', 'Q', 'R', 'S', 'T', 'U', 'V', 'W', 'X', 'Y', 'Z', 'a', 'b', 'c', 'd',
+        'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l', 'm', 'n', 'o', 'p', 'q', 'r', 's',
+        't', 'u', 'v', 'w', 'x', 'y', 'z', 0, 1, 2, 3, 4, 5, 6, 7, 8, 9],
+    'fontsDirectory' => base_path('assets/fonts'),
+    'bgsDirectory' => base_path('assets/backgrounds'),
+    'default' => [
+        'length' => 5,
+        'width' => 160,
+        'height' => 50,
+        'quality' => 90,
+        'math' => false,
+        'expire' => 60,
+        'encrypt' => false,
+        'bgColor' => '#ffffff',
+        'bgImage' => false,
+    ],
+    'flat' => [
+        'length' => 5,
+        'width' => 160,
+        'height' => 50,
+        'quality' => 90,
+        'math' => false,
+        'bgColor' => '#f0f0f0',
+        'bgImage' => false,
+    ],
+    'mini' => [
+        'length' => 3,
+        'width' => 60,
+        'height' => 32,
+    ],
+    'inverse' => [
+        'length' => 5,
+        'width' => 120,
+        'height' => 36,
+        'quality' => 90,
+        'sensitive' => true,
+        'bgColor' => '#ffffff',
+        'bgImage' => false,
+    ],
+    'math' => [
+        'length' => 9,
+        'width' => 120,
+        'height' => 36,
+        'quality' => 90,
+    ],
+];
