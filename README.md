@@ -2,7 +2,7 @@
 
 **Defensa contra bots y abuso automatizado con CAPTCHA en Laravel 13**
 
-Proyecto de laboratorio de la materia **INF781 — Seguridad de Software** de la **Universidad Autónoma Tomás Frías (Potosí, Bolivia)**. Implementa tres mecanismos CAPTCHA distintos sobre formularios sensibles: reCAPTCHA v2, mews/captcha local y honeypot con rate limiting.
+Proyecto de laboratorio de la materia **INF781 — Seguridad de Software**  . Implementa tres mecanismos CAPTCHA distintos sobre formularios sensibles: reCAPTCHA v2, mews/captcha local y honeypot con rate limiting.
 
 ## Formularios protegidos
 
@@ -84,12 +84,15 @@ Los tests validan:
 ## Capturas
 
 ### Formulario de registro — reCAPTCHA v2
+
 ![Formulario de registro con reCAPTCHA v2](assets/images/registro_captcha.png)
 
 ### Formulario de login — mews/captcha
+
 ![Formulario de login con CAPTCHA local mews/captcha](assets/images/login_captcha.png)
 
 ### Formulario de contacto — Honeypot + Rate Limiting
+
 ![Formulario de contacto con honeypot](assets/images/contact_captcha.png)
 
 ## Análisis crítico y discusión
