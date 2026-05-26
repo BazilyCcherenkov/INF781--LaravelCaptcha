@@ -76,6 +76,7 @@ php artisan test --filter=CaptchaProtectionTest
 ```
 
 Los tests validan:
+
 - Rechazo de registro sin token reCAPTCHA
 - Rechazo de login sin código CAPTCHA
 - Rechazo silencioso de bots en formulario de contacto (honeypot)
@@ -83,12 +84,15 @@ Los tests validan:
 ## Capturas
 
 ### Formulario de registro — reCAPTCHA v2
+
 ![Registro con reCAPTCHA v2](https://via.placeholder.com/600x400?text=Captura:+Registro+reCAPTCHA+v2)
 
 ### Formulario de login — mews/captcha
+
 ![Login con CAPTCHA local](https://via.placeholder.com/600x400?text=Captura:+Login+mews+captcha)
 
 ### Formulario de contacto — Honeypot + Rate Limiting
+
 ![Contacto con honeypot](https://via.placeholder.com/600x400?text=Captura:+Contacto+Honeypot)
 
 ## Análisis crítico
@@ -96,6 +100,7 @@ Los tests validan:
 ### 1. Amenazas mitigadas y residuales
 
 Cada formulario protegido mitiga amenazas específicas:
+
 - **Registro (reCAPTCHA v2)**: Evita registro masivo de cuentas falsas (Sybil attacks) y automatización de creación de usuarios.
 - **Login (mews/captcha)**: Dificulta ataques de fuerza bruta y credential stuffing al añadir una barrera visual por intento.
 - **Contacto (honeypot + rate limiting)**: Filtra bots rudimentarios (honeypot) y limita el spam volumétrico (rate limiting).
@@ -117,10 +122,12 @@ Cada formulario protegido mitiga amenazas específicas:
 ### 3. Evasión de CAPTCHA y defensas complementarias
 
 **Formas conocidas de elusión:**
+
 1. **OCR avanzado**: Modelos CNN/RNN como Google Tesseract resuelven CAPTCHAs de texto con alta precisión. Los CAPTCHAs locales (mews/captcha) son particularmente vulnerables.
 2. **Granjas humanas**: Servicios como 2Captcha resuelven cualquier CAPTCHA por ~0.50 USD por 1000 resoluciones, haciendo económicamente viable eludir la protección.
 
 **Defensas adicionales:**
+
 - **Rate limiting por IP y usuario** (ya implementado en contacto y login nativo de Laravel)
 - **Autenticación multifactor (MFA)** como segunda capa después del login
 - **Análisis de comportamiento**: Tiempo entre pulsaciones, movimiento de ratón, patrón de navegación
@@ -129,6 +136,7 @@ Cada formulario protegido mitiga amenazas específicas:
 ### 4. Privacidad y GDPR
 
 reCAPTCHA de Google introduce problemas graves de privacidad. Google recopila:
+
 - Cookies de terceros y datos de navegación
 - Reputación de IP y señales de dispositivo
 - Historial de interacciones con reCAPTCHA en múltiples sitios
@@ -138,10 +146,3 @@ Esto conflictúa con el Reglamento General de Protección de Datos (GDPR) de la 
 ## Licencia
 
 MIT License
-
-## Autor
-
-**BazilyCcherenkov** — INF781 — Seguridad de Software
-Universidad Autónoma Tomás Frías — Potosí, Bolivia
-
-Docente: M. Sc. Huáscar Fedor Gonzales Guzmán
