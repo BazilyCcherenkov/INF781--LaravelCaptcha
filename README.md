@@ -84,16 +84,13 @@ Los tests validan:
 ## Capturas
 
 ### Formulario de registro — reCAPTCHA v2
-
-![Registro con reCAPTCHA v2](https://via.placeholder.com/600x400?text=Captura:+Registro+reCAPTCHA+v2)
+![Formulario de registro con reCAPTCHA v2](assets/images/registro_captcha.png)
 
 ### Formulario de login — mews/captcha
-
-![Login con CAPTCHA local](https://via.placeholder.com/600x400?text=Captura:+Login+mews+captcha)
+![Formulario de login con CAPTCHA local mews/captcha](assets/images/login_captcha.png)
 
 ### Formulario de contacto — Honeypot + Rate Limiting
-
-![Contacto con honeypot](https://via.placeholder.com/600x400?text=Captura:+Contacto+Honeypot)
+![Formulario de contacto con honeypot](assets/images/contact_captcha.png)
 
 ## Análisis crítico
 
